@@ -5,14 +5,16 @@ internal class ComponentClassEntry
     public Type Class { get; set; }
     public string Id { get; set; }
     public ExperimentComponentClass? ActiveComponent { get; set; }
+    public string? ActiveComponentName { get; set; }
     public Action<ExperimentComponentClass?> ChangeHandler { get; set; }
     public object? ActiveComponentsSettings { get; set; }
-    public ComponentClassEntry(Type className, string id, ExperimentComponentClass? activeComponent, Action<ExperimentComponentClass?> changeHandler, object? activeComponentsSettingsUsed = null)
+    public ComponentClassEntry(Type className, string id, ExperimentComponentClass? activeComponent, Action<ExperimentComponentClass?> changeHandler, string? activeComponentName, object? activeComponentsSettingsUsed = null)
     {
         Class = className;
         Id = id;
         ActiveComponent = activeComponent;
         ChangeHandler = changeHandler;
+        ActiveComponentName = activeComponentName;
         ActiveComponentsSettings = activeComponentsSettingsUsed;
     }
 }
@@ -57,7 +59,7 @@ public class ExperimentContainer : IDisposable
         {
             throw new ArgumentException($"Component class {type} with id {id} already exists");
         }
-        ComponentClasses.Add(new(type, id, null, delegate { }));
+        ComponentClasses.Add(new(type, id, null, delegate { }, null));
         Components[type] = new();
         return this;
     }
@@ -106,6 +108,17 @@ public class ExperimentContainer : IDisposable
         return entry.ActiveComponent;
     }
 
+    public string? GetActiveComponentName<T>(string? classId = null) where T : ExperimentComponentClass => GetActiveComponentName(typeof(T), classId);
+    public string? GetActiveComponentName(Type componentClass, string? classId = null)
+    {
+        var entry = ComponentClasses.FirstOrDefault(c => c.Class == componentClass && (classId == null || c.Id == classId));
+        if (entry == null)
+        {
+            throw new ArgumentException($"Unknown component class {componentClass}{(classId != null ? $" ({classId})" : "")}");
+        }
+        return entry.ActiveComponentName;
+    }
+
     public object? GetActiveComponentSettings(Type componentClass, string? classId = null)
     {
         var entry = ComponentClasses.FirstOrDefault(c => c.Class == componentClass && (classId == null || c.Id == classId));
@@ -128,13 +141,12 @@ public class ExperimentContainer : IDisposable
             throw new ArgumentException($"Unknown component class {componentClass}{(classId != null ? $" ({classId})" : "")}");
         }
         classId = entry.Id;
-        if (componentName == null)
-        {
-            entry.ActiveComponent?.Dispose();
-            entry.ActiveComponent = null;
-            entry.ActiveComponentsSettings = null;
-        }
-        else
+        entry.ActiveComponent?.Dispose();
+        entry.ActiveComponent = null;
+        entry.ActiveComponentsSettings = null;
+        entry.ActiveComponentName = componentName;
+
+        if (componentName != null)
         {
             var typeOfComponent = GetComponentTypeFromName(componentName) ?? throw new ArgumentException($"Component {componentName} not found");
 
@@ -144,9 +156,6 @@ public class ExperimentContainer : IDisposable
                 throw new ArgumentException($"Settings type {settings?.GetType().Name} is not assignable to {settingsType}");
             }
 
-            entry.ActiveComponent?.Dispose();
-            entry.ActiveComponent = null;
-            entry.ActiveComponentsSettings = settings;
             try
             {
                 var newInstance = (settingsType == null ? Activator.CreateInstance(typeOfComponent) : Activator.CreateInstance(typeOfComponent, settings))
@@ -169,7 +178,7 @@ public class ExperimentContainer : IDisposable
         {
             throw new ArgumentException($"Unknown component class {componentClass}{(classId != null ? $" ({classId})" : "")}");
         }
-        ActivateComponent(componentClass, classId, entry.ActiveComponent?.GetType().Name ?? null, entry.ActiveComponentsSettings);
+        ActivateComponent(componentClass, classId, entry.ActiveComponentName, entry.ActiveComponentsSettings);
     }
 
     /// <summary>Registers an event handler for a specific component class (like `LaserComponent`) being changed</summary>

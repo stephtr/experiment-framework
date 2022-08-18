@@ -19,7 +19,7 @@ internal partial class ComponentSettingsData
     public string PickAnAlternativeText => $"Pick a {Name} type";
     public string? SelectedComponent
     {
-        get => Container.GetActiveComponent(ComponentClass, ClassId)?.GetType().Name;
+        get => Container.GetActiveComponentName(ComponentClass, ClassId);
         set
         {
             if (SelectedComponent == value)
