@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SharedWinUI\SharedWinUI.csproj" />
-    <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Shared\ExperimentFrameworkShared.csproj" />
   </ItemGroup>
 
   <!-- 
