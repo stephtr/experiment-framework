@@ -143,7 +143,7 @@ public class ExperimentContainer : IDisposable
         classId = entry.Id;
         entry.ActiveComponent?.Dispose();
         entry.ActiveComponent = null;
-        entry.ActiveComponentsSettings = null;
+        entry.ActiveComponentsSettings = settings;
         entry.ActiveComponentName = componentName;
 
         if (componentName != null)
