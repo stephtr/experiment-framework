@@ -20,7 +20,10 @@ public class FakeLaserSettings
 [DisplayName("Debug")]
 public class FakeLaser : LaserComponent
 {
-    public FakeLaser(FakeLaserSettings settings) { }
+    public FakeLaser(FakeLaserSettings settings)
+    {
+        Thread.Sleep(2000);
+    }
     public override bool IsOn { get; set; }
     private double power = 0;
     public override double TargetPower { get => power; set => power = Math.Clamp(value, 0, MaxTargetPower); }

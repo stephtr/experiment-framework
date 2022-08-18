@@ -133,7 +133,7 @@ public class ExperimentContainer : IDisposable
     /// Populates a specific component slot identified by `componentClass` and optionally `classId`
     /// with the component of name `componentName` and the specified settings.
     /// </summary>
-    public void ActivateComponent(Type componentClass, string? classId, string? componentName, object? settings = null)
+    public Task ActivateComponentAsync(Type componentClass, string? classId, string? componentName, object? settings = null)
     {
         var entry = ComponentClasses.FirstOrDefault(c => c.Class == componentClass && (classId == null || c.Id == classId));
         if (entry == null)
@@ -146,29 +146,33 @@ public class ExperimentContainer : IDisposable
         entry.ActiveComponentsSettings = settings;
         entry.ActiveComponentName = componentName;
 
-        if (componentName != null)
+        return Task.Run(() =>
         {
-            var typeOfComponent = GetComponentTypeFromName(componentName) ?? throw new ArgumentException($"Component {componentName} not found");
-
-            var settingsType = ExperimentComponentClass.GetSettingsType(typeOfComponent);
-            if (settingsType != null && !(settingsType.IsAssignableFrom(settings?.GetType())))
+            if (componentName != null)
             {
-                throw new ArgumentException($"Settings type {settings?.GetType().Name} is not assignable to {settingsType}");
+                var typeOfComponent = GetComponentTypeFromName(componentName) ?? throw new ArgumentException($"Component {componentName} not found");
+
+                var settingsType = ExperimentComponentClass.GetSettingsType(typeOfComponent);
+                if (settingsType != null && !(settingsType.IsAssignableFrom(settings?.GetType())))
+                {
+                    throw new ArgumentException($"Settings type {settings?.GetType().Name} is not assignable to {settingsType}");
+                }
+
+                try
+                {
+                    var newInstance = (settingsType == null ? Activator.CreateInstance(typeOfComponent) : Activator.CreateInstance(typeOfComponent, settings))
+                        as ExperimentComponentClass ?? throw new ArgumentException($"Component {componentName} couldn't be initialized");
+                    entry.ActiveComponent = newInstance;
+                }
+                catch { }
             }
+        }).ContinueWith((_) =>
+        {
+            entry.ChangeHandler.Invoke(entry.ActiveComponent);
+            ComponentChanged.Invoke(componentClass, classId, entry.ActiveComponent);
 
-            try
-            {
-                var newInstance = (settingsType == null ? Activator.CreateInstance(typeOfComponent) : Activator.CreateInstance(typeOfComponent, settings))
-                    as ExperimentComponentClass ?? throw new ArgumentException($"Component {componentName} couldn't be initialized");
-                entry.ActiveComponent = newInstance;
-            }
-            catch { }
-        }
-
-        entry.ChangeHandler.Invoke(entry.ActiveComponent);
-        ComponentChanged.Invoke(componentClass, classId, entry.ActiveComponent);
-
-        SettingsSaveHandler?.Invoke(this, classId, componentName, settings);
+            SettingsSaveHandler?.Invoke(this, classId, componentName, settings);
+        }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     public void ReloadComponent(Type componentClass, string? classId = null)
@@ -178,7 +182,7 @@ public class ExperimentContainer : IDisposable
         {
             throw new ArgumentException($"Unknown component class {componentClass}{(classId != null ? $" ({classId})" : "")}");
         }
-        ActivateComponent(componentClass, classId, entry.ActiveComponentName, entry.ActiveComponentsSettings);
+        ActivateComponentAsync(componentClass, classId, entry.ActiveComponentName, entry.ActiveComponentsSettings);
     }
 
     /// <summary>Registers an event handler for a specific component class (like `LaserComponent`) being changed</summary>
@@ -217,7 +221,7 @@ public class ExperimentContainer : IDisposable
             }
             try
             {
-                ActivateComponent(entry.Class, entry.Id, componentName, settings);
+                ActivateComponentAsync(entry.Class, entry.Id, componentName, settings);
             }
             catch { }
         }

@@ -37,7 +37,7 @@ internal partial class ComponentSettingsData
                     settings = Activator.CreateInstance(settingsType);
                 }
             }
-            Container.ActivateComponent(ComponentClass, ClassId, value, settings);
+            Container.ActivateComponentAsync(ComponentClass, ClassId, value, settings);
             FreezeSettingsUpdates = true;
             OnPropertyChanged(nameof(Settings));
             FreezeSettingsUpdates = false;
@@ -51,7 +51,7 @@ internal partial class ComponentSettingsData
         {
             if (!FreezeSettingsUpdates)
             {
-                Container.ActivateComponent(ComponentClass, ClassId, SelectedComponent, value);
+                Container.ActivateComponentAsync(ComponentClass, ClassId, SelectedComponent, value);
             }
         }
     }
