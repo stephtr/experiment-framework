@@ -1,25 +1,69 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
 
 namespace ExperimentFramework;
 
-internal record NameDisplayName(string Name, string DisplayName);
+internal record NameDisplayName(string? Name, string DisplayName);
 
-internal class ComponentSettingsData
+[ObservableObject]
+internal partial class ComponentSettingsData
 {
+    private ExperimentContainer Container { get; init; }
     public Type ComponentClass { get; init; }
+    public string ClassId { get; init; }
     public string Name { get; init; }
     public string Icon { get; init; }
     public IEnumerable<NameDisplayName> PotentialComponents;
     public string PickAnAlternativeText => $"Pick a {Name} type";
-
-    public ComponentSettingsData(ExperimentContainer container, Type componentCategory)
+    public string? SelectedComponent
     {
-        ComponentClass = componentCategory;
-        Name = ExperimentComponentClass.GetName(componentCategory);
-        Icon = ExperimentComponentClass.GetIconString(componentCategory);
-        PotentialComponents = container.GetComponents(componentCategory).Select(x => new NameDisplayName(x.Name, x.DisplayName)).Prepend(new NameDisplayName("", "Disabled"));
+        get => Container.GetActiveComponent(ComponentClass, ClassId)?.GetType().Name;
+        set
+        {
+            if (SelectedComponent == value)
+            {
+                return;
+            }
+            OnPropertyChanging(nameof(Settings));
+            object? settings = null;
+            if (value != null)
+            {
+                var componentType = Container.GetComponentTypeFromName(value);
+                var settingsType = ExperimentComponentClass.GetSettingsType(componentType);
+                if (settingsType != null)
+                {
+                    settings = Activator.CreateInstance(settingsType);
+                }
+            }
+            Container.ActivateComponent(ComponentClass, ClassId, value, settings);
+            FreezeSettingsUpdates = true;
+            OnPropertyChanged(nameof(Settings));
+            FreezeSettingsUpdates = false;
+        }
+    }
+    private bool FreezeSettingsUpdates = false;
+    public object? Settings
+    {
+        get => Container.GetActiveComponentSettings(ComponentClass, ClassId);
+        set
+        {
+            if (!FreezeSettingsUpdates)
+            {
+                Container.ActivateComponent(ComponentClass, ClassId, SelectedComponent, value);
+            }
+        }
+    }
+
+    public ComponentSettingsData(ExperimentContainer container, Type componentClass, string classId)
+    {
+        Container = container;
+        ComponentClass = componentClass;
+        ClassId = classId;
+        Name = ExperimentComponentClass.GetName(componentClass);
+        Icon = ExperimentComponentClass.GetIconString(componentClass);
+        PotentialComponents = container.GetComponents(componentClass).Select(x => new NameDisplayName(x.Name, x.DisplayName)).Prepend(new NameDisplayName(null, "Disabled"));
     }
 }
 
@@ -38,22 +82,9 @@ public sealed partial class ExperimentSettings : UserControl
         var settingsPanel = (ExperimentSettings)d;
         var container = (ExperimentContainer)e.NewValue;
 
-        container.ComponentChanged += (componentClass, id, component) =>
-        {
-            /*for (var i = 0; i < settingsPanel.ComponentsData.Count; i++)
-            {
-                if (settingsPanel.ComponentsData[i].ComponentCategory == componentClass)
-                {
-                    settingsPanel.ComponentsData[i] = new ComponentStatusBarData(componentClass, component);
-                    return;
-                }
-            }
-            settingsPanel.ComponentsData.Add(new ComponentStatusBarData(componentClass, component));*/
-        };
-
         settingsPanel.ComponentsData.Clear();
-        var componentDataToAdd = container.GetComponentClasses().Select(componentCategory =>
-            new ComponentSettingsData(container, componentCategory));
+        var componentDataToAdd = container.GetComponentClasses().Select(entry =>
+            new ComponentSettingsData(container, entry.Class, entry.Id));
         foreach (var data in componentDataToAdd)
         {
             settingsPanel.ComponentsData.Add(data);

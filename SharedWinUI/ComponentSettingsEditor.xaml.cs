@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace ExperimentFramework;
 
-public class SettingItem : ObservableObject
+internal class SettingItem : ObservableObject
 {
     public string Name { get; set; }
     public string DisplayName { get; set; }
@@ -15,7 +15,7 @@ public class SettingItem : ObservableObject
         DisplayName = displayName ?? name;
     }
 }
-public partial class StringSettingItem : SettingItem
+internal partial class StringSettingItem : SettingItem
 {
     [ObservableProperty]
     private string currentValue;
@@ -24,7 +24,7 @@ public partial class StringSettingItem : SettingItem
         this.currentValue = currentValue;
     }
 }
-public partial class BoolSettingItem : SettingItem
+internal partial class BoolSettingItem : SettingItem
 {
     [ObservableProperty]
     private bool currentValue;
@@ -33,7 +33,7 @@ public partial class BoolSettingItem : SettingItem
         this.currentValue = currentValue;
     }
 }
-public partial class IntSettingItem : SettingItem
+internal partial class IntSettingItem : SettingItem
 {
     [ObservableProperty]
     private int currentValue;
@@ -42,7 +42,7 @@ public partial class IntSettingItem : SettingItem
         this.currentValue = currentValue;
     }
 }
-public partial class DoubleSettingItem : SettingItem
+internal partial class DoubleSettingItem : SettingItem
 {
     [ObservableProperty]
     private double currentValue;
@@ -51,7 +51,7 @@ public partial class DoubleSettingItem : SettingItem
         this.currentValue = currentValue;
     }
 }
-public partial class StringListSettingItem : SettingItem
+internal partial class StringListSettingItem : SettingItem
 {
     public IEnumerable<string> Options { get; set; }
     [ObservableProperty]
@@ -63,7 +63,7 @@ public partial class StringListSettingItem : SettingItem
     }
 }
 
-public class SettingDataTemplateSelector : DataTemplateSelector
+internal class SettingDataTemplateSelector : DataTemplateSelector
 {
     public DataTemplate StringTemplate { get; set; } = null!;
     public DataTemplate BoolTemplate { get; set; } = null!;
@@ -85,7 +85,7 @@ public class SettingDataTemplateSelector : DataTemplateSelector
         SelectTemplateCore(item);
 }
 
-public sealed partial class ComponentSettingsEditor : UserControl
+internal sealed partial class ComponentSettingsEditor : UserControl
 {
     public object? Settings
     {
@@ -94,16 +94,12 @@ public sealed partial class ComponentSettingsEditor : UserControl
     }
     public static readonly DependencyProperty SettingsProperty = DependencyProperty.Register("Settings", typeof(object), typeof(ComponentSettingsEditor), new PropertyMetadata(null, SettingsChanged));
 
-    public object? EditedSettings
-    {
-        get => GetValue(EditedSettingsProperty);
-        set => SetValue(EditedSettingsProperty, value);
-    }
-    public static readonly DependencyProperty EditedSettingsProperty = DependencyProperty.Register("EditedSettings", typeof(object), typeof(ComponentSettingsEditor), new PropertyMetadata(null));
-
     private static void SettingsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        (d as ComponentSettingsEditor)?.RebuildControl();
+        if (e.OldValue?.GetType() != e.NewValue?.GetType())
+        {
+            (d as ComponentSettingsEditor)?.RebuildControl();
+        }
     }
 
     public ObservableCollection<SettingItem> SettingEntries = new();
@@ -114,13 +110,18 @@ public sealed partial class ComponentSettingsEditor : UserControl
         SettingEntries.CollectionChanged += SettingEntries_CollectionChanged;
     }
 
+    private bool FreezeSettingsChangeNotifications = false;
     private void SettingEntries_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        EditedSettings = GetUpdatedSettings();
+        if (!FreezeSettingsChangeNotifications)
+        {
+            Settings = GetUpdatedSettings();
+        }
     }
 
     public void RebuildControl()
     {
+        FreezeSettingsChangeNotifications = true;
         SettingEntries.Clear();
         var SettingsType = Settings?.GetType();
         var properties = SettingsType?.GetProperties();
@@ -155,6 +156,7 @@ public sealed partial class ComponentSettingsEditor : UserControl
             SettingEntries.Add(item);
             item.PropertyChanged += (sender, e) => SettingEntries[SettingEntries.IndexOf(item)] = item;
         }
+        FreezeSettingsChangeNotifications = false;
     }
 
     private object? GetUpdatedSettings()

@@ -20,8 +20,8 @@
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Margin="40,0,0,0">
-                        <ComboBox Header="Type" ItemsSource="{x:Bind PotentialComponents}" PlaceholderText="{x:Bind PickAnAlternativeText}" SelectedValue="{Binding SelectedComponent, Mode=TwoWay}" DisplayMemberPath="DisplayName" SelectedValuePath="Name"  HorizontalAlignment="Stretch" />
-                        <local:ComponentSettingsEditor Settings="{Binding Settings}" EditedSettings="{Binding EditedSettings, Mode=TwoWay}" />
+                        <ComboBox Header="Type" ItemsSource="{x:Bind PotentialComponents}" PlaceholderText="{x:Bind PickAnAlternativeText}" SelectedValue="{x:Bind SelectedComponent, Mode=TwoWay}" DisplayMemberPath="DisplayName" SelectedValuePath="Name"  HorizontalAlignment="Stretch" />
+                        <local:ComponentSettingsEditor Settings="{x:Bind Settings, Mode=TwoWay}" />
                     </StackPanel>
                 </Expander>
             </DataTemplate>

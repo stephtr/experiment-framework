@@ -1,19 +1,32 @@
-﻿using Microsoft.UI.Composition;
+﻿using Microsoft.UI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System.Runtime.InteropServices;
 using WinRT;
+using WinRT.Interop;
 
 namespace ExperimentFramework;
 
-public class MicaUtils
+public class MicaWindow
 {
     WindowsSystemDispatcherQueueHelper wsdqHelper = new(); // See separate sample below for implementation
     MicaController? micaController;
     SystemBackdropConfiguration? configurationSource;
 
-    public bool EnableMica(Window window)
+    internal MicaWindow(Window window, bool useCustomTitlebar)
     {
+        if (useCustomTitlebar)
+        {
+            var hwnd = WindowNative.GetWindowHandle(window);
+            var wndId = Win32Interop.GetWindowIdFromWindow(hwnd);
+            var appWindow = AppWindow.GetFromWindowId(wndId);
+            appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+            appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+            appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        }
+
         wsdqHelper.EnsureWindowsSystemDispatcherQueueController();
 
         if (MicaController.IsSupported())
@@ -31,10 +44,7 @@ public class MicaUtils
             // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
             micaController.AddSystemBackdropTarget(window.As<ICompositionSupportsSystemBackdrop>());
             micaController.SetSystemBackdropConfiguration(configurationSource);
-            return true; // succeeded
         }
-
-        return false; // Mica is not supported on this system
     }
 
     public void Activate(WindowActivatedEventArgs args)
@@ -55,6 +65,14 @@ public class MicaUtils
             micaController = null;
         }
         configurationSource = null;
+    }
+}
+
+public static class MicaWindowExtensions
+{
+    public static MicaWindow EnableMica(this Window window, bool useCustomTitlebar = false)
+    {
+        return new MicaWindow(window, useCustomTitlebar);
     }
 }
 

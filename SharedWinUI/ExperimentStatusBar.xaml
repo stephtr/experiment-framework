@@ -14,7 +14,7 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="local:ComponentStatusBarData">
-                <StackPanel Orientation="Horizontal" Background="{x:Bind BackgroundBrush}" Margin="5,5,0,5" Padding="10,0" CornerRadius="5">
+                <StackPanel Orientation="Horizontal" Background="{x:Bind BackgroundBrush}" Margin="5,5,0,5" Padding="10,0" CornerRadius="5" DoubleTapped="{x:Bind ReloadComponent}">
                     <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Foreground="White" Text="{x:Bind Icon}" VerticalAlignment="Center" />
                     <TextBlock Text="{x:Bind NameWithDescription}" Foreground="White" VerticalAlignment="Center" Margin="5,0,3,3" />
                 </StackPanel>

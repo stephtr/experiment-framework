@@ -1,29 +1,57 @@
+using System.Reflection;
 using Windows.Storage;
 
 namespace ExperimentFramework;
 
 public static class SettingsStore
 {
-    /*public static object? GetSettingsForType(this ExperimentContainer container, Type componentClass, string? componentString)
+    public static void UseWinUISettingsStore(this ExperimentContainer container)
     {
-        if (componentString == null) return null;
-
-        var settingsType = container.GetSettingsType(componentClass, componentString);
-        return settingsType == null ? null : GetComponentSettings(settingsType);
+        container.SettingsSaveHandler = SaveSettings;
+        container.SettingsLoadHandler = LoadSettings;
     }
 
-    public static void InitFromSettings(this ExperimentContainer container)
+    private static void SaveSettings(ExperimentContainer sender, string containerId, string? activeComponentName, object? settings)
     {
-        container.InitFrom((type) =>
+        ApplicationData.Current.LocalSettings.Values[$"Settings.SelectedComponent[{containerId}]"] = activeComponentName;
+        if (settings == null)
         {
-            var selectedComponentString = (string?)ApplicationData.Current.LocalSettings.Values[$"Settings.SelectedComponent[{componentClass}]"];
-            if (selectedComponentString is null)
-            {
-                return null;
-            }
+            return;
+        }
+        var settingsType = settings.GetType();
+        foreach (var property in settingsType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings[{containerId}][{property.Name}]"] = property.GetValue(settings);
+        }
+    }
 
-            var settings = GetSettingsForType(container, componentClass, componentString);
-            return (selectedComponentString, settings);
-        });
-    }*/
+    private static (string? ActiveComponentName, object? Settings) LoadSettings(ExperimentContainer sender, string containerId)
+    {
+        var activeComponentName = (string?)ApplicationData.Current.LocalSettings.Values[$"Settings.SelectedComponent[{containerId}]"];
+        if (activeComponentName == null)
+        {
+            return (null, null);
+        }
+
+        var settingsType = ExperimentComponentClass.GetSettingsType(sender.GetComponentTypeFromName(activeComponentName));
+        if (settingsType == null)
+        {
+            return (activeComponentName, null);
+        }
+
+        var settings = Activator.CreateInstance(settingsType);
+        foreach (var property in settingsType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+        {
+            var value = ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings[{containerId}][{property.Name}]"];
+            if (value != null)
+            {
+                try
+                {
+                    property.SetValue(settings, value);
+                }
+                catch { }
+            }
+        }
+        return (activeComponentName, settings);
+    }
 }

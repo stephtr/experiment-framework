@@ -6,16 +6,20 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:xf="using:ExperimentFramework"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Activated="Window_Activated"
+    Closed="Window_Closed">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
-        <ScrollViewer>
+        <TextBlock Text="TestApp" Margin="17,0,0,0" VerticalAlignment="Center" />
+        <ScrollViewer Grid.Row="1">
             <xf:ExperimentSettings Container="{x:Bind Components}" />
         </ScrollViewer>
-        <xf:ExperimentStatusBar Grid.Row="1" Container="{x:Bind Components}" />
+        <xf:ExperimentStatusBar Grid.Row="2" Container="{x:Bind Components}" />
     </Grid>
 </Window>
