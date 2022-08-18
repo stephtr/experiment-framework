@@ -32,9 +32,9 @@ Components.UseWinUISettingsStore();
 Components.LoadFromSettings();
 ```
 
-Initialize a component:
+Initialize a component (if not anyway being done by `LoadFromSettings` or by the [ExperimentSettings](#experimentsettings) component):
 ```c#
-Components.ActivateComponent(typeof(LaserComponent), null, typeof(FakeLaser).Name, new FakeLaserSettings());
+Components.ActivateComponentAsync(typeof(LaserComponent), null, typeof(FakeLaser).Name, new FakeLaserSettings());
 ```
 
 Get & use a component:
