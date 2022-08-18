@@ -144,11 +144,16 @@ public class ExperimentContainer : IDisposable
                 throw new ArgumentException($"Settings type {settings?.GetType().Name} is not assignable to {settingsType}");
             }
 
-            var newInstance = (settingsType == null ? Activator.CreateInstance(typeOfComponent) : Activator.CreateInstance(typeOfComponent, settings))
-                as ExperimentComponentClass ?? throw new ArgumentException($"Component {componentName} couldn't be initialized");
             entry.ActiveComponent?.Dispose();
-            entry.ActiveComponent = newInstance;
+            entry.ActiveComponent = null;
             entry.ActiveComponentsSettings = settings;
+            try
+            {
+                var newInstance = (settingsType == null ? Activator.CreateInstance(typeOfComponent) : Activator.CreateInstance(typeOfComponent, settings))
+                    as ExperimentComponentClass ?? throw new ArgumentException($"Component {componentName} couldn't be initialized");
+                entry.ActiveComponent = newInstance;
+            }
+            catch { }
         }
 
         entry.ChangeHandler.Invoke(entry.ActiveComponent);

@@ -89,9 +89,11 @@ public class FakeCamera : CameraComponent
 {
     private bool IsRunning = true;
     private int UsedBuffers = 0;
+    private double InitialPhase;
     public FakeCamera()
     {
         var bitCount = 12;
+        InitialPhase = DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0;
         Task.Run(() =>
         {
             while (IsRunning)
@@ -102,7 +104,7 @@ public class FakeCamera : CameraComponent
                     if (listenerCount > 0)
                     {
                         var lineBuffer = new double[SensorWidth];
-                        var phase = (DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0) * 2;
+                        var phase = (DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0 - InitialPhase) * 2;
                         for (var x = 0; x < SensorWidth; x++)
                         {
                             lineBuffer[x] = (Math.Sin(x * 5.0 / SensorWidth + phase) + 1) * (1 << bitCount) / 2;
