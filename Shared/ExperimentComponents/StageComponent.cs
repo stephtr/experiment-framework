@@ -13,7 +13,8 @@ public abstract class AxisComponent
 public abstract class StageComponent : ExperimentComponentClass
 {
     public abstract AxisComponent[] Axes { get; }
-    public abstract Task ScanCircle(double radius, double period, int circles = 1);
+    public abstract int MaxNumberPointsToMoveAlong(int axisCount);
+    public abstract Task MoveAlongPath(IReadOnlyList<double[]> path, int[] axes, double frequency);
 }
 
 public class FakeAxis : AxisComponent
@@ -36,22 +37,31 @@ public class FakeAxis : AxisComponent
 public class FakeStage : StageComponent
 {
     public override AxisComponent[] Axes { get; } = new FakeAxis[] { new(), new(), new() };
-    public override async Task ScanCircle(double radius, double period, int circles = 1)
+
+    public override int MaxNumberPointsToMoveAlong(int axisCount) => int.MaxValue;
+
+    public override async Task MoveAlongPath(IReadOnlyList<double[]> path, int[] axes, double frequency)
     {
+        if (axes.Length < 1 || axes.Length != path.Count || !path.All(p => p.Length == path[0].Length))
+        {
+            throw new ArgumentException("All path axes must have the same length");
+        }
+
         var startDate = DateTime.UtcNow;
-        var targetX = Axes[0].TargetPosition;
-        var targetY = Axes[0].TargetPosition;
+        var pointCount = path[0].Length;
         while (true)
         {
-            var now = DateTime.UtcNow;
-            var round = (now - startDate).TotalSeconds / period;
-            if (round > circles) break;
-            var phi = 2 * Math.PI * round;
-            Axes[0].TargetPosition = targetX + radius * Math.Sin(phi);
-            Axes[1].TargetPosition = targetY + radius * Math.Cos(phi);
+            var t = (DateTime.UtcNow - startDate).TotalSeconds;
+            var pathIndex = Math.Min((int)Math.Floor(t * frequency), pointCount - 1);
+            for (var iAx = 0; iAx < axes.Length; iAx++)
+            {
+                Axes[axes[iAx]].TargetPosition = path[iAx][pathIndex];
+            }
+            if (pathIndex == pointCount - 1)
+            {
+                break;
+            }
             await Task.Delay(10);
         }
-        Axes[0].TargetPosition = targetX;
-        Axes[1].TargetPosition = targetY;
     }
 }
