@@ -4,6 +4,8 @@ This framework is specifically made for apps controlling physical experiments.
 
 Its purpose is to manage external components and provide a layer of abstraction which makes switching between different implementations (devices surving a specific purpose, for example different lasers) easy.
 
+Implementations exist for Lasers (TOPTICA), Cameras (Andor, Baumer, FLIR Grasshopper, Photonfocus) and Stages (MadCityLabs, SmarAct), although the source code can't be put under Open Source.
+
 ## Example usage
 
 For a working example (including the UI components), see the [TestApp](TestApp).
