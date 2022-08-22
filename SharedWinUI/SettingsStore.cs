@@ -55,3 +55,42 @@ public static class SettingsStore
         return (activeComponentName, settings);
     }
 }
+
+public static class ApplicationDataUtils
+{
+    public static void SaveMatrix(this ApplicationDataContainer container, string key, IEnumerable<double[]> value)
+    {
+        var i1 = 0;
+        foreach (var point in value)
+        {
+            var i2 = 0;
+            foreach (var c in point)
+            {
+                container.Values[$"{key}.{i1}_{i2}"] = c;
+                i2++;
+            }
+            for (; container.Values.Remove($"{key}.{i1}_{i2}"); i2++) ;
+            i1++;
+        }
+        for (; container.Values.Remove($"{key}.{i1}_0"); i1++)
+        { // remove surplus points
+            for (var i2 = 1; container.Values.Remove($"{key}.{i1}_{i2}"); i2++) ;
+        }
+    }
+
+    public static void LoadMatrix(this ApplicationDataContainer container, string key, Action<double[]> callback)
+    {
+        for (var i1 = 0; ; i1++)
+        {
+            var p = new List<double>();
+            for (var i2 = 0; ; i2++)
+            {
+                var val = container.Values[$"{key}.{i1}_{i2}"] as double?;
+                if (!val.HasValue) break;
+                p.Add(val.Value);
+            }
+            if (p.Count == 0) break;
+            callback(p.ToArray());
+        }
+    }
+}
