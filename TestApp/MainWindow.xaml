@@ -18,8 +18,8 @@
         </Grid.RowDefinitions>
         <TextBlock Text="TestApp" Margin="17,0,0,0" VerticalAlignment="Center" />
         <ScrollViewer Grid.Row="1">
-            <xf:ExperimentSettings Container="{x:Bind Components}" />
+            <xf:ExperimentSettings />
         </ScrollViewer>
-        <xf:ExperimentStatusBar Grid.Row="2" Container="{x:Bind Components}" />
+        <xf:ExperimentStatusBar Grid.Row="2" />
     </Grid>
 </Window>

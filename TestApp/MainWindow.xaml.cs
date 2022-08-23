@@ -7,17 +7,16 @@ namespace TestApp
 {
     public sealed partial class MainWindow : Window
     {
-        public ExperimentContainer Components = new();
-
         public MicaWindow MicaWindow;
 
         public MainWindow()
         {
-            this.InitializeComponent();
-
+            var Components = ExperimentContainer.Singleton;
             Components.AddComponentClass<LaserComponent>();
             Components.AddComponentClass<StageComponent>();
             Components.AddComponent<FakeLaser>();
+
+            this.InitializeComponent();
 
             Components.UseWinUISettingsStore();
             Components.LoadFromSettings();
