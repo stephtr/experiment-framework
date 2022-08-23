@@ -11,7 +11,7 @@ Implementations exist for Lasers (TOPTICA), Cameras (Andor, Baumer, FLIR Grassho
 For a working example (including the UI components), see the [TestApp](TestApp).
 
 ```c#
-ExperimentContainer Components = new();
+var Components = ExperimentContainer.Singleton;
 ```
 
 Add component classes:

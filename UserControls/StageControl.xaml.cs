@@ -197,6 +197,9 @@ public partial class StageViewModel : ObservableObject
     private bool LoopRunning = true;
     public StageViewModel()
     {
+        Stage = ExperimentContainer.Singleton.GetActiveComponent<StageComponent>();
+        ExperimentContainer.Singleton.AddComponentChangeHandler<StageComponent>((stage) => Stage = stage);
+
         PropertyChanged += (o, e) =>
         {
             if (e.PropertyName == nameof(Stage))
@@ -278,19 +281,6 @@ public partial class StageViewModel : ObservableObject
 
 public sealed partial class StageControl : UserControl
 {
-    public StageComponent? Stage
-    {
-        get => (StageComponent)GetValue(StageProperty);
-        set => SetValue(StageProperty, value);
-    }
-    public static readonly DependencyProperty StageProperty = DependencyProperty.Register("Stage", typeof(StageComponent), typeof(StageControl), new PropertyMetadata(null, StageChanged));
-
-    private static void StageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var control = (StageControl)d;
-        ((StageViewModel)control.DataContext).Stage = (StageComponent?)e.NewValue;
-    }
-
     public StageControl()
     {
         this.InitializeComponent();

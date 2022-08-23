@@ -21,6 +21,8 @@ internal class ComponentClassEntry
 
 public class ExperimentContainer : IDisposable
 {
+    public static ExperimentContainer Singleton { get; } = new ExperimentContainer();
+
     /// <summary>Available component classes, like `LaserComponent`</summary>
     private readonly List<ComponentClassEntry> ComponentClasses = new();
     /// <summary>A list of possible component class implementations, like `TopticaLaserComponent`</summary>

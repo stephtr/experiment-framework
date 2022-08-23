@@ -8,7 +8,6 @@ namespace ExperimentFramework;
 
 internal partial class ComponentStatusBarData
 {
-    ExperimentContainer Container { get; init; }
     public Type ComponentClass { get; init; }
     public string ClassId { get; set; }
     public string Name { get; init; }
@@ -17,9 +16,8 @@ internal partial class ComponentStatusBarData
     public string NameWithDescription => ActiveComponentName == null ? Name : $"{Name}: {ActiveComponentName}";
     public Brush BackgroundBrush { get; init; }
 
-    public ComponentStatusBarData(ExperimentContainer container, Type componentClass, string classId, ExperimentComponentClass? activeComponent)
+    public ComponentStatusBarData(Type componentClass, string classId, ExperimentComponentClass? activeComponent)
     {
-        Container = container;
         ComponentClass = componentClass;
         ClassId = classId;
         Name = ExperimentComponentClass.GetName(componentClass);
@@ -30,7 +28,7 @@ internal partial class ComponentStatusBarData
 
     public void ReloadComponent()
     {
-        Container.ReloadComponent(ComponentClass, ClassId);
+        ExperimentContainer.Singleton.ReloadComponent(ComponentClass, ClassId);
     }
 }
 
@@ -38,41 +36,28 @@ public sealed partial class ExperimentStatusBar : UserControl
 {
     ObservableCollection<ComponentStatusBarData> ComponentsData = new();
 
-    public ExperimentContainer Container
-    {
-        get => (ExperimentContainer)GetValue(ContainerProperty);
-        set => SetValue(ContainerProperty, value);
-    }
-    public static readonly DependencyProperty ContainerProperty = DependencyProperty.Register(nameof(Container), typeof(ExperimentContainer), typeof(ExperimentStatusBar), new PropertyMetadata(null, OnContainerChanged));
-    private static void OnContainerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var statusBar = (ExperimentStatusBar)d;
-        var container = (ExperimentContainer)e.NewValue;
-
-        container.ComponentChanged += (componentClass, id, component) =>
-        {
-            for (var i = 0; i < statusBar.ComponentsData.Count; i++)
-            {
-                if (statusBar.ComponentsData[i].ComponentClass == componentClass)
-                {
-                    statusBar.ComponentsData[i] = new ComponentStatusBarData(container, componentClass, id, component);
-                    return;
-                }
-            }
-            statusBar.ComponentsData.Add(new ComponentStatusBarData(container, componentClass, id, component));
-        };
-
-        statusBar.ComponentsData.Clear();
-        var componentDataToAdd = container.GetComponentClasses().Select((entry) =>
-            new ComponentStatusBarData(container, entry.Class, entry.Id, container.GetActiveComponent(entry.Class, entry.Id)));
-        foreach (var data in componentDataToAdd)
-        {
-            statusBar.ComponentsData.Add(data);
-        }
-    }
-
     public ExperimentStatusBar()
     {
         this.InitializeComponent();
+
+        var componentDataToAdd = ExperimentContainer.Singleton.GetComponentClasses().Select((entry) =>
+            new ComponentStatusBarData(entry.Class, entry.Id, ExperimentContainer.Singleton.GetActiveComponent(entry.Class, entry.Id)));
+        foreach (var data in componentDataToAdd)
+        {
+            ComponentsData.Add(data);
+        }
+
+        ExperimentContainer.Singleton.ComponentChanged += (componentClass, id, component) =>
+        {
+            for (var i = 0; i < ComponentsData.Count; i++)
+            {
+                if (ComponentsData[i].ComponentClass == componentClass)
+                {
+                    ComponentsData[i] = new ComponentStatusBarData(componentClass, id, component);
+                    return;
+                }
+            }
+            ComponentsData.Add(new ComponentStatusBarData(componentClass, id, component));
+        };
     }
 }
