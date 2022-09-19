@@ -9,7 +9,7 @@
     <ItemsControl ItemsSource="{x:Bind ComponentsData, Mode=OneWay}" Grid.Row="1">
         <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="local:ComponentSettingsData">
-                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                <Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="0,5,0,5">
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Height="60">
                             <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="{x:Bind Icon}" FontSize="26" Width="40" VerticalAlignment="Center" />
