@@ -36,7 +36,7 @@ public class FakeAxis : AxisComponent
 [DisplayName("Debug")]
 public class FakeStage : StageComponent
 {
-    public override AxisComponent[] Axes { get; } = new FakeAxis[] { new(), new(), new() };
+    public override AxisComponent[] Axes { get; } = new FakeAxis[] { new(), new(), new(), new(), new(), new() };
 
     public override int MaxNumberPointsToMoveAlong(int axisCount) => int.MaxValue;
 

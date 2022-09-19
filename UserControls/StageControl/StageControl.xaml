@@ -1,0 +1,28 @@
+﻿<UserControl
+    x:Class="ExperimentFramework.StageControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ExperimentFramework"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Unloaded="UserControl_Unloaded">
+
+    <StackPanel Background="{ThemeResource CardBackgroundFillColorDefault}" Padding="10" CornerRadius="5" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefault}">
+        <RelativePanel>
+            <FlipView Name="SectionsFlipView" ItemsSource="{x:Bind ViewModel.SectionViews, Mode=OneWay}" Background="Transparent" >
+                <FlipView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel AreScrollSnapPointsRegular="False" Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </FlipView.ItemsPanel>
+                <FlipView.ItemTemplate>
+                    <DataTemplate x:DataType="local:StageSectionViewModel">
+                        <local:StageSectionControl ViewModel="{x:Bind (local:StageSectionViewModel)}" />
+                    </DataTemplate>
+                </FlipView.ItemTemplate>
+            </FlipView>
+            <PipsPager NumberOfPages="{x:Bind SectionsFlipView.Items.Count, Mode=OneWay}" SelectedPageIndex="{x:Bind SectionsFlipView.SelectedIndex, Mode=TwoWay}" RelativePanel.Below="SectionsFlipView" RelativePanel.AlignHorizontalCenterWithPanel="True" />
+        </RelativePanel>
+    </StackPanel>
+</UserControl>

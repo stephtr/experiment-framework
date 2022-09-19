@@ -54,15 +54,15 @@ public class GameController
         return new GameControllerReading
         {
             Axis = new double[]{
-                    CleanAxisValue(-reading.LeftThumbstickY),
                     CleanAxisValue(reading.LeftThumbstickX),
+                    CleanAxisValue(reading.LeftThumbstickY),
                     CleanAxisValue(reading.RightTrigger - reading.LeftTrigger, 0),
                     CleanAxisValue(reading.RightThumbstickX),
                     CleanAxisValue(reading.RightThumbstickY),
                 },
             AxisDiscrete = new int[]{
-                    reading.Buttons.HasFlag(GamepadButtons.DPadUp) ? -1 : reading.Buttons.HasFlag(GamepadButtons.DPadDown) ? +1 : 0,
                     reading.Buttons.HasFlag(GamepadButtons.DPadLeft) ? -1 : reading.Buttons.HasFlag(GamepadButtons.DPadRight) ? +1 : 0,
+                    reading.Buttons.HasFlag(GamepadButtons.DPadDown) ? -1 : reading.Buttons.HasFlag(GamepadButtons.DPadUp) ? +1 : 0,
                     reading.Buttons.HasFlag(GamepadButtons.LeftShoulder) ? -1 : reading.Buttons.HasFlag(GamepadButtons.RightShoulder) ? +1 : 0,
                 },
             A = reading.Buttons.HasFlag(GamepadButtons.A),
