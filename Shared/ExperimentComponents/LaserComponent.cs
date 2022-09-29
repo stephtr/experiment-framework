@@ -8,6 +8,9 @@ public abstract class LaserComponent : ExperimentComponentClass
     public abstract double TargetPower { get; set; }
     public abstract double MaxTargetPower { get; }
     public abstract double ActualPower { get; }
+    public abstract int BurstSize { get; set; }
+    public abstract int BurstFrequencyDivider { get; set; }
+    public abstract void Burst();
 }
 
 public class FakeLaserSettings
@@ -37,4 +40,7 @@ public class FakeLaser : LaserComponent
             return power + noise * 10;
         }
     }
+    public override int BurstSize { get; set; } = 0;
+    public override int BurstFrequencyDivider { get; set; } = 0;
+    public override void Burst() { }
 }
