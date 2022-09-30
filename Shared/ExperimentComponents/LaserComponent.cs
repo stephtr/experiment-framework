@@ -4,6 +4,8 @@ namespace ExperimentFramework;
 [IconString("\xE754")]
 public abstract class LaserComponent : ExperimentComponentClass
 {
+    public abstract bool HasPowerControl { get; }
+    public abstract bool HasBurstControl { get; }
     public abstract bool IsOn { get; set; }
     public abstract double TargetPower { get; set; }
     public abstract double MaxTargetPower { get; }
@@ -23,6 +25,9 @@ public class FakeLaserSettings
 [DisplayName("Debug")]
 public class FakeLaser : LaserComponent
 {
+    public override bool HasPowerControl => true;
+    public override bool HasBurstControl => true;
+
     public FakeLaser(FakeLaserSettings settings)
     {
         Thread.Sleep(2000);
