@@ -1,6 +1,7 @@
 namespace ExperimentFramework;
 
-public enum LaserMode {
+public enum LaserMode
+{
     Continuous,
     Burst,
 }
@@ -21,20 +22,13 @@ public abstract class LaserComponent : ExperimentComponentClass
     public abstract void Burst();
 }
 
-public class FakeLaserSettings
-{
-    [Options(nameof(TestValues))]
-    public string Test { get; set; } = "";
-    public static IEnumerable<string> TestValues { get => new string[] { "a", "b", "c" }; }
-}
-
 [DisplayName("Debug (cw)")]
 public class FakeLaser : LaserComponent
 {
     public override bool HasPowerControl => true;
     public override bool HasBurstControl => false;
 
-    public FakeLaser(FakeLaserSettings settings)
+    public FakeLaser()
     {
         Thread.Sleep(2000);
     }
@@ -63,7 +57,7 @@ public class FakePulsedLaser : LaserComponent
     public override bool HasPowerControl => false;
     public override bool HasBurstControl => true;
 
-    public FakePulsedLaser(FakeLaserSettings settings)
+    public FakePulsedLaser()
     {
         Thread.Sleep(2000);
     }
