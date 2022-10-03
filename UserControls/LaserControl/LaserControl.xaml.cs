@@ -18,6 +18,7 @@ public partial class LaserViewModel : ObservableObject, IDisposable
             {
                 Laser.IsOn = value;
                 OnPropertyChanged(nameof(IsOn));
+                OnPropertyChanged(nameof(ActualPower));
                 TriggerCommand.NotifyCanExecuteChanged();
             }
         }
@@ -41,14 +42,32 @@ public partial class LaserViewModel : ObservableObject, IDisposable
     public bool HasPowerControl => laser?.HasPowerControl ?? false;
     public bool HasBurstControl => laser?.HasBurstControl ?? false;
 
-    public double MaxTargetPower { get => Laser?.MaxTargetPower ?? 0; }
-    public string ActualPower { get => IsAvailable ? Laser!.ActualPower.ToString("N2") + " mW" : "–"; }
+    public double MaxTargetPower
+    {
+        get
+        {
+            if (Laser == null || !Laser.HasPowerControl) return 0;
+            return Laser.MaxTargetPower;
+        }
+    }
+    public string ActualPower
+    {
+        get
+        {
+            if (Laser == null || !Laser.HasPowerControl) return "-";
+            return Laser.ActualPower.ToString("N2") + " mW";
+        }
+    }
     public double TargetPower
     {
-        get => Laser?.TargetPower ?? 0;
+        get
+        {
+            if (Laser == null || !Laser.HasPowerControl) return 0;
+            return Laser.TargetPower;
+        }
         set
         {
-            if (Laser != null)
+            if (Laser != null && Laser.HasPowerControl)
             {
                 Laser.TargetPower = Math.Clamp(value, 0, MaxTargetPower);
                 OnPropertyChanged(nameof(TargetPower));
@@ -57,7 +76,7 @@ public partial class LaserViewModel : ObservableObject, IDisposable
         }
     }
 
-    public bool CanTrigger => laser?.IsOn ?? false;
+    public bool CanTrigger => Laser != null && Laser.IsOn && Laser.HasBurstControl;
     [RelayCommand(CanExecute = nameof(CanTrigger))]
     private void Trigger()
     {
@@ -81,7 +100,11 @@ public partial class LaserViewModel : ObservableObject, IDisposable
 
     public int BurstSize
     {
-        get => Laser?.BurstSize ?? 0;
+        get
+        {
+            if (Laser == null || !Laser.HasBurstControl) return 0;
+            return Laser.BurstSize;
+        }
         set
         {
             if (Laser != null)
@@ -93,7 +116,11 @@ public partial class LaserViewModel : ObservableObject, IDisposable
     }
     public int BurstFrequencyDivider
     {
-        get => Laser?.BurstFrequencyDivider ?? 0;
+        get
+        {
+            if (Laser == null || !Laser.HasBurstControl) return 0;
+            return Laser.BurstFrequencyDivider;
+        }
         set
         {
             if (Laser != null)
@@ -115,6 +142,7 @@ public partial class LaserViewModel : ObservableObject, IDisposable
             while (LoopRunning)
             {
                 OnPropertyChanged(nameof(IsOn));
+                OnPropertyChanged(nameof(ActualPower));
                 await Task.Delay(500);
             }
         };
@@ -128,7 +156,13 @@ public partial class LaserViewModel : ObservableObject, IDisposable
                 var dt = Math.Min(0.1, (DateTime.UtcNow - lastTimeStamp).TotalSeconds);
                 lastTimeStamp = DateTime.UtcNow;
 
-                // TODO
+                if (reading.A && !previousReading.A)
+                {
+                    if (CanTrigger)
+                    {
+                        TriggerCommand.Execute(null);
+                    }
+                }
 
                 previousReading = reading;
                 await Task.Delay(20);

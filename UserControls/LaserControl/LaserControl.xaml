@@ -16,7 +16,7 @@
         <RelativePanel Margin="0,10,0,0">
             <ToggleSwitch IsOn="{x:Bind ViewModel.IsOn, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.IsAvailable}" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" />
             <TextBlock Text="Actual power:" Margin="10,0,0,0" RelativePanel.LeftOf="ActualPowerText" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
-            <TextBlock Name="ActualPowerText" Text="{Binding ActualPower}" Margin="3,0,0,0" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
+            <TextBlock Name="ActualPowerText" Text="{x:Bind ViewModel.ActualPower}" Margin="3,0,0,0" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
         </RelativePanel>
         <TextBlock Text="Target Power (mW)" Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasPowerControl}" />
         <Grid Visibility="{x:Bind ViewModel.HasPowerControl}">
@@ -25,8 +25,8 @@
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="100" />
             </Grid.ColumnDefinitions>
-            <Slider Value="{Binding TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{Binding MaxTargetPower}" IsEnabled="{Binding IsAvailable}" />
-            <local:CustomNumberBox Value="{Binding TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{Binding MaxTargetPower}" IsEnabled="{Binding IsAvailable}" Grid.Column="2" />
+            <Slider Value="{x:Bind ViewModel.TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{x:Bind ViewModel.MaxTargetPower}" IsEnabled="{x:Bind ViewModel.IsAvailable}" />
+            <local:CustomNumberBox Value="{x:Bind ViewModel.TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{x:Bind ViewModel.MaxTargetPower}" IsEnabled="{x:Bind ViewModel.IsAvailable}" Grid.Column="2" />
         </Grid>
         <TextBlock Text="Burst control" Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasBurstControl}" Grid.Column="0" Grid.Row="0" />
         <RelativePanel Visibility="{x:Bind ViewModel.HasBurstControl}">
