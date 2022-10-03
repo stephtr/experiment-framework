@@ -63,6 +63,6 @@ Displays controls to change between different component class implementations an
 <img src="Assets/ExperimentSettings.png" alt="Screenshot of the ExperimentSettings" height="288">
 
 ### ExperimentStatusBar
-Shows a statusbar which displays all loaded components and their state:
+Shows a statusbar which displays all loaded components and their state (double click to reload a component):
 
 <img src="Assets/ExperimentStatusBar.png" alt="Screenshot of the ExperimentStatusBar" height="40">
