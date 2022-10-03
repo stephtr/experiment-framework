@@ -29,6 +29,7 @@ public partial class LaserViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(HasPowerControl))]
     [NotifyPropertyChangedFor(nameof(HasBurstControl))]
     [NotifyPropertyChangedFor(nameof(IsOn))]
+    [NotifyPropertyChangedFor(nameof(PowerUnit))]
     [NotifyPropertyChangedFor(nameof(MaxTargetPower))]
     [NotifyPropertyChangedFor(nameof(ActualPower))]
     [NotifyPropertyChangedFor(nameof(TargetPower))]
@@ -39,9 +40,10 @@ public partial class LaserViewModel : ObservableObject, IDisposable
     [NotifyCanExecuteChangedFor(nameof(TriggerCommand))]
     private LaserComponent? laser;
 
-    public bool HasPowerControl => laser?.HasPowerControl ?? false;
-    public bool HasBurstControl => laser?.HasBurstControl ?? false;
+    public bool HasPowerControl => Laser?.HasPowerControl ?? false;
+    public bool HasBurstControl => Laser?.HasBurstControl ?? false;
 
+    public string PowerUnit => Laser?.PowerUnit ?? "";
     public double MaxTargetPower
     {
         get
@@ -55,7 +57,7 @@ public partial class LaserViewModel : ObservableObject, IDisposable
         get
         {
             if (Laser == null || !Laser.HasPowerControl) return "-";
-            return Laser.ActualPower.ToString("N2") + " mW";
+            return $"{Laser.ActualPower:N2} {Laser.PowerUnit}";
         }
     }
     public double TargetPower

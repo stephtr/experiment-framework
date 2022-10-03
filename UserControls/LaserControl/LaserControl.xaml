@@ -18,7 +18,9 @@
             <TextBlock Text="Actual power:" Margin="10,0,0,0" RelativePanel.LeftOf="ActualPowerText" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
             <TextBlock Name="ActualPowerText" Text="{x:Bind ViewModel.ActualPower}" Margin="3,0,0,0" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
         </RelativePanel>
-        <TextBlock Text="Target Power (mW)" Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasPowerControl}" />
+        <TextBlock Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasPowerControl}">
+            Target Power (<Run Text="{x:Bind ViewModel.PowerUnit}" />)
+        </TextBlock>
         <Grid Visibility="{x:Bind ViewModel.HasPowerControl}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
