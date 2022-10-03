@@ -1,5 +1,10 @@
 namespace ExperimentFramework;
 
+public enum LaserMode {
+    Continuous,
+    Burst,
+}
+
 [DisplayName("Laser")]
 [IconString("\xE754")]
 public abstract class LaserComponent : ExperimentComponentClass
@@ -10,6 +15,7 @@ public abstract class LaserComponent : ExperimentComponentClass
     public abstract double TargetPower { get; set; }
     public abstract double MaxTargetPower { get; }
     public abstract double ActualPower { get; }
+    public abstract LaserMode Mode { get; set; }
     public abstract int BurstSize { get; set; }
     public abstract int BurstFrequencyDivider { get; set; }
     public abstract void Burst();
@@ -22,11 +28,11 @@ public class FakeLaserSettings
     public static IEnumerable<string> TestValues { get => new string[] { "a", "b", "c" }; }
 }
 
-[DisplayName("Debug")]
+[DisplayName("Debug (cw)")]
 public class FakeLaser : LaserComponent
 {
     public override bool HasPowerControl => true;
-    public override bool HasBurstControl => true;
+    public override bool HasBurstControl => false;
 
     public FakeLaser(FakeLaserSettings settings)
     {
@@ -45,7 +51,28 @@ public class FakeLaser : LaserComponent
             return power + noise * 10;
         }
     }
-    public override int BurstSize { get; set; } = 0;
-    public override int BurstFrequencyDivider { get; set; } = 0;
+    public override LaserMode Mode { get => LaserMode.Continuous; set { if (value != LaserMode.Continuous) throw new NotSupportedException(); } }
+    public override int BurstSize { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override int BurstFrequencyDivider { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override void Burst() { throw new NotSupportedException(); }
+}
+
+[DisplayName("Debug (pulsed)")]
+public class FakePulsedLaser : LaserComponent
+{
+    public override bool HasPowerControl => false;
+    public override bool HasBurstControl => true;
+
+    public FakePulsedLaser(FakeLaserSettings settings)
+    {
+        Thread.Sleep(2000);
+    }
+    public override bool IsOn { get; set; }
+    public override double TargetPower { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override double MaxTargetPower { get => throw new NotSupportedException(); }
+    public override double ActualPower { get => throw new NotSupportedException(); }
+    public override LaserMode Mode { get; set; } = LaserMode.Burst;
+    public override int BurstSize { get; set; } = 1;
+    public override int BurstFrequencyDivider { get; set; } = 1;
     public override void Burst() { }
 }

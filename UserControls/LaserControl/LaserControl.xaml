@@ -1,0 +1,59 @@
+﻿<UserControl
+    x:Class="ExperimentFramework.LaserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ExperimentFramework"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:DefaultBindMode="OneWay">
+
+    <StackPanel Background="{ThemeResource CardBackgroundFillColorDefault}" Padding="10" CornerRadius="5" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefault}">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="&#xE754;" VerticalAlignment="Center" FontWeight="SemiLight" FontSize="22" Margin="0,3,8,0" />
+            <TextBlock Text="Laser" FontSize="22" />
+        </StackPanel>
+        <RelativePanel Margin="0,10,0,0">
+            <ToggleSwitch IsOn="{x:Bind ViewModel.IsOn, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.IsAvailable}" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" />
+            <TextBlock Text="Actual power:" Margin="10,0,0,0" RelativePanel.LeftOf="ActualPowerText" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
+            <TextBlock Name="ActualPowerText" Text="{Binding ActualPower}" Margin="3,0,0,0" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" Visibility="{x:Bind ViewModel.HasPowerControl}" />
+        </RelativePanel>
+        <TextBlock Text="Target Power (mW)" Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasPowerControl}" />
+        <Grid Visibility="{x:Bind ViewModel.HasPowerControl}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <Slider Value="{Binding TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{Binding MaxTargetPower}" IsEnabled="{Binding IsAvailable}" />
+            <local:CustomNumberBox Value="{Binding TargetPower, Mode=TwoWay}" Minimum="0" Maximum="{Binding MaxTargetPower}" IsEnabled="{Binding IsAvailable}" Grid.Column="2" />
+        </Grid>
+        <TextBlock Text="Burst control" Margin="0,5,0,3" Visibility="{x:Bind ViewModel.HasBurstControl}" Grid.Column="0" Grid.Row="0" />
+        <RelativePanel Visibility="{x:Bind ViewModel.HasBurstControl}">
+            <ComboBox ItemsSource="{x:Bind ViewModel.Modes}" SelectedItem="{x:Bind ViewModel.Mode, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.IsAvailable}" Visibility="{x:Bind ViewModel.HasBurstControl}" Name="cbMode" />
+            <Button Margin="5,0,5,0" VerticalAlignment="Stretch" RelativePanel.RightOf="cbMode" Visibility="{x:Bind ViewModel.IsInBurstMode}" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
+                <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="&#xE713;" />
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Burst size" Margin="0,0,0,3" />
+                                <NumberBox Value="{x:Bind ViewModel.BurstSize}" Minimum="1" />
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                                <TextBlock Text="Frequency divider" Margin="0,0,0,3" />
+                                <NumberBox Value="{x:Bind ViewModel.BurstFrequencyDivider}" Minimum="1" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <Button HorizontalAlignment="Stretch" Command="{x:Bind ViewModel.TriggerCommand}" RelativePanel.AlignRightWithPanel="True" Visibility="{x:Bind ViewModel.HasBurstControl}" Style="{StaticResource AccentButtonStyle}" Name="btnTrigger">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="&#xE945;" Margin="0,3,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Trigger" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </RelativePanel>
+    </StackPanel>
+</UserControl>
