@@ -11,6 +11,7 @@ internal class AxisViewModel : ObservableObject
     public AxisComponent Axis { get; set; }
     public string Name { get; set; }
     public string Id { get; set; }
+    private readonly bool SavePosition;
     public bool PositiveDirection { get; set; }
     public double MinPosition { get => Axis.MinPosition; }
     public double MaxPosition { get => Axis.MaxPosition; }
@@ -21,7 +22,10 @@ internal class AxisViewModel : ObservableObject
         set
         {
             Axis.TargetPosition = Math.Clamp(value, MinPosition, MaxPosition);
-            DebouncedSave(Id, Axis.TargetPosition);
+            if (SavePosition)
+            {
+                DebouncedSave(Id, Axis.TargetPosition);
+            }
             OnPropertyChanged(nameof(TargetPosition));
             OnPropertyChanged(nameof(ActualPositionFormatted));
         }
@@ -36,16 +40,20 @@ internal class AxisViewModel : ObservableObject
         OnPropertyChanged(nameof(ActualPositionFormatted));
     }
 
-    public AxisViewModel(AxisComponent axis, string name, string id, bool positiveDirection)
+    public AxisViewModel(AxisComponent axis, string name, string id, bool positiveDirection, bool savePosition)
     {
         Axis = axis;
         Id = id;
         Name = name + ":";
         PositiveDirection = positiveDirection;
-        var lastPosition = ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{id}"];
-        if (lastPosition != null)
+        SavePosition = savePosition;
+        if (SavePosition)
         {
-            Axis.TargetPosition = (double)lastPosition;
+            var lastPosition = ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{id}"];
+            if (lastPosition != null)
+            {
+                Axis.TargetPosition = (double)lastPosition;
+            }
         }
     }
 }
@@ -60,12 +68,12 @@ internal partial class StageSectionViewModel : ObservableObject
 
     private static string[] AxisNames = new string[] { "X", "Y", "Z", "U", "V", "W" };
 
-    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool PositiveDirection)> axes, string title, string id, bool enableTiltCompensation)
+    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool PositiveDirection)> axes, string title, string id, bool enableTiltCompensation, bool savePosition)
     {
         Title = title;
         foreach (var (ax, i) in axes.Select((ax, i) => (ax, i)))
         {
-            Axes.Add(new AxisViewModel(ax.Axis, AxisNames[i], $"{id}-{AxisNames[i]}", ax.PositiveDirection));
+            Axes.Add(new AxisViewModel(ax.Axis, AxisNames[i], $"{id}-{AxisNames[i]}", ax.PositiveDirection, savePosition));
         }
         if (enableTiltCompensation && Axes.Count >= 3)
         {

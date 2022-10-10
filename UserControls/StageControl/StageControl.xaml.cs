@@ -25,9 +25,10 @@ internal partial class StageControlViewModel : ObservableObject
             }
             return;
         }
+        var haveToSavePosition = !stage.MaintainsPosition;
         if (sections == null)
         {
-            SectionViews = new StageSectionViewModel[] { new(stage.Axes.Select(ax => (ax, true)), "Stage", "stage", true) };
+            SectionViews = new StageSectionViewModel[] { new(stage.Axes.Select(ax => (ax, true)), "Stage", "stage", true, haveToSavePosition) };
             return;
         }
 
@@ -37,7 +38,7 @@ internal partial class StageControlViewModel : ObservableObject
                 s.Axes.Select(ax =>
                     (ax.AxisIndex < stage.Axes.Length ? (stage.Axes[ax.AxisIndex], ax.PositiveDirection) : (null, true))
                 ).Where(ax => ax.Item1 != null) as IEnumerable<(AxisComponent, bool)>,
-                s.Title ?? "Stage", i.ToString(), s.EnableTiltCompensation
+                s.Title ?? "Stage", i.ToString(), s.EnableTiltCompensation, haveToSavePosition
             );
         }).ToArray();
     }
