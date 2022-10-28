@@ -12,6 +12,7 @@ public abstract class AxisComponent
 [IconString("\xE759")]
 public abstract class StageComponent : ExperimentComponentClass
 {
+    public abstract bool MaintainsPosition { get; }
     public abstract AxisComponent[] Axes { get; }
     public abstract int MaxNumberPointsToMoveAlong(int axisCount);
     public abstract Task MoveAlongPath(IReadOnlyList<double[]> path, int[] axes, double frequency);
@@ -36,7 +37,8 @@ public class FakeAxis : AxisComponent
 [DisplayName("Debug")]
 public class FakeStage : StageComponent
 {
-    public override AxisComponent[] Axes { get; } = new FakeAxis[] { new(), new(), new() };
+    public override bool MaintainsPosition => false;
+    public override AxisComponent[] Axes { get; } = new FakeAxis[] { new(), new(), new(), new(), new(), new() };
 
     public override int MaxNumberPointsToMoveAlong(int axisCount) => int.MaxValue;
 
