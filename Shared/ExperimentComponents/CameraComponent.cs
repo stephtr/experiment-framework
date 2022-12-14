@@ -33,8 +33,9 @@ public class CameraFrame : IDisposable
     public readonly int Width;
     public readonly int Height;
     public readonly int BitsPerPixel;
+    public readonly double dt;
 
-    public CameraFrame(IntPtr image, int width, int height, int bitsPerPixel, int inUseCount, Action onDispose, Func<bool> availabilityCheck)
+    public CameraFrame(IntPtr image, int width, int height, int bitsPerPixel, int inUseCount, Action onDispose, Func<bool> availabilityCheck, double dt)
     {
         ImagePtr = image;
         Width = width;
@@ -43,6 +44,7 @@ public class CameraFrame : IDisposable
         InUseCount = inUseCount;
         OnDispose = onDispose;
         AvailabilityCheck = availabilityCheck;
+        this.dt = dt;
     }
 
     private ulong FrameSum = ulong.MaxValue;
@@ -94,6 +96,7 @@ public class FakeCamera : CameraComponent
     {
         var bitCount = 12;
         InitialPhase = DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0;
+        var previousTime = DateTime.UtcNow;
         Task.Run(() =>
         {
             while (IsRunning)
@@ -104,7 +107,7 @@ public class FakeCamera : CameraComponent
                     if (listenerCount > 0)
                     {
                         var lineBuffer = new double[SensorWidth];
-                        var phase = (DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0 - InitialPhase) * 2;
+                        var phase = (DateTime.UtcNow.Second + DateTime.UtcNow.Millisecond / 1000.0 - InitialPhase) * 5 * 2*Math.PI;
                         for (var x = 0; x < SensorWidth; x++)
                         {
                             lineBuffer[x] = (Math.Sin(x * 5.0 / SensorWidth + phase) + 1) * (1 << bitCount) / 2;
@@ -123,17 +126,20 @@ public class FakeCamera : CameraComponent
                             }
                         }
                         //image[0] = ushort.MaxValue;
+                        var now = DateTime.UtcNow;
+                        var dt = (now - previousTime).TotalSeconds;
+                        previousTime = now;
                         Interlocked.Increment(ref UsedBuffers);
                         listenerCount = FrameAvailable.GetInvocationList().Length;
                         var frame = new CameraFrame(handle.AddrOfPinnedObject(), SensorWidth, SensorHeight, bitCount, listenerCount, () =>
                         {
                             handle.Free();
                             Interlocked.Decrement(ref UsedBuffers);
-                        }, () => IsRunning);
+                        }, () => IsRunning, dt);
                         FrameAvailable.Invoke(frame);
                     }
                 }
-                Thread.Sleep(10);
+                Thread.Sleep(1);
             }
         });
     }
