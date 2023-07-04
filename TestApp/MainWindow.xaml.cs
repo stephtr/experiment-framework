@@ -7,8 +7,6 @@ namespace TestApp
 {
     public sealed partial class MainWindow : Window
     {
-        public MicaWindow MicaWindow;
-
         public MainWindow()
         {
             var Components = ExperimentContainer.Singleton;
@@ -22,17 +20,6 @@ namespace TestApp
             Components.LoadFromSettings();
 
             Title = "TestApp";
-            MicaWindow = this.EnableMica(useCustomTitlebar: true);
-        }
-
-        private void Window_Activated(object sender, WindowActivatedEventArgs args)
-        {
-            MicaWindow.Activate(args);
-        }
-
-        private void Window_Closed(object sender, WindowEventArgs args)
-        {
-            MicaWindow.Close();
         }
     }
 }
