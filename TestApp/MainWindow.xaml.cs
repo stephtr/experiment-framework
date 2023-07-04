@@ -20,6 +20,9 @@ namespace TestApp
             Components.LoadFromSettings();
 
             Title = "TestApp";
+            ExtendsContentIntoTitleBar = true;
+            AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+            AppWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         }
     }
 }
