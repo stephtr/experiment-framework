@@ -12,7 +12,7 @@
         <Button>
             <StackPanel Orientation="Horizontal">
                 <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="&#xE755;" Margin="0,3,8,0" VerticalAlignment="Center" />
-                <TextBlock Text="Tilt compensation" VerticalAlignment="Center" />
+                <TextBlock Text="Tilt adjust" VerticalAlignment="Center" />
             </StackPanel>
             <Button.Flyout>
                 <Flyout>

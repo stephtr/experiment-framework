@@ -6,7 +6,7 @@ using Windows.Storage;
 
 namespace ExperimentFramework;
 
-internal class AxisViewModel : ObservableObject
+internal partial class AxisViewModel : ObservableObject
 {
     public AxisComponent Axis { get; set; }
     public string Name { get; set; }
@@ -21,6 +21,7 @@ internal class AxisViewModel : ObservableObject
         get => Axis.TargetPosition;
         set
         {
+            if (IsLocked) return;
             Axis.TargetPosition = Math.Clamp(value, MinPosition, MaxPosition);
             if (SavePosition)
             {
@@ -34,6 +35,14 @@ internal class AxisViewModel : ObservableObject
     {
         ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{id}"] = position;
     });
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnlocked))]
+    private bool isLocked = false;
+    public bool IsUnlocked => !IsLocked;
+
+    [ObservableProperty]
+    private float stepSize = 1f;
 
     public void UpdatePosition()
     {
@@ -60,6 +69,7 @@ internal class AxisViewModel : ObservableObject
 
 internal partial class StageSectionViewModel : ObservableObject
 {
+    public string Id { get; init; }
     public string Title { get; init; }
 
     StageTiltCompensationViewModel? TiltCompensation = null;
@@ -68,8 +78,40 @@ internal partial class StageSectionViewModel : ObservableObject
 
     private static string[] AxisNames = new string[] { "X", "Y", "Z", "U", "V", "W" };
 
+    private bool isLocked;
+    public bool IsLocked
+    {
+        get => isLocked;
+        set {
+            isLocked = value;
+            OnPropertyChanged(nameof(IsUnlocked));
+            foreach (var axis in Axes)
+            {
+                axis.IsLocked = value;
+            }
+            ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{Id}.IsLocked"] = value;
+        }
+    }
+    public bool IsUnlocked => !IsLocked;
+
+    private float stepSize;
+    public float StepSize
+    {
+        get => stepSize;
+        set {
+            stepSize = value;
+            OnPropertyChanged(nameof(StepSize));
+            foreach (var axis in Axes)
+            {
+                axis.StepSize = value;
+            }
+            ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{Id}.StepSize"] = value;
+        }
+    }
+
     public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool PositiveDirection)> axes, string title, string id, bool enableTiltCompensation, bool savePosition)
     {
+        Id = id;
         Title = title;
         foreach (var (ax, i) in axes.Select((ax, i) => (ax, i)))
         {
@@ -79,6 +121,8 @@ internal partial class StageSectionViewModel : ObservableObject
         {
             TiltCompensation = new StageTiltCompensationViewModel(id, axes.Select(ax => ax.Axis));
         }
+        IsLocked = (bool?)ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{Id}.IsLocked"] ?? false;
+        StepSize = (float?)ApplicationData.Current.LocalSettings.Values[$"Settings.ComponentSettings.Stage.{Id}.StepSize"] ?? 1f;
     }
 
     public void Update()
@@ -93,8 +137,6 @@ internal partial class StageSectionViewModel : ObservableObject
     DateTime lastTimeStamp = DateTime.UtcNow;
     public void GameControllerUpdate(GameControllerReading reading)
     {
-        var stepSizes = new double[] { 0.5, 0.5, 0.02 }; // µm
-
         var dt = Math.Min(0.1, (DateTime.UtcNow - lastTimeStamp).TotalSeconds);
         lastTimeStamp = DateTime.UtcNow;
 
@@ -109,10 +151,10 @@ internal partial class StageSectionViewModel : ObservableObject
             {
                 moveBy[i] += reading.Axis[i] * dt * 200;
             }
-            if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, reading.X, reading.Y }.All(x => x == false))
+            if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, /*reading.X, */ reading.Y }.All(x => x == false))
             {
                 var speed = reading.X ? 10 : 1;
-                moveBy[i] += reading.AxisDiscrete[i] * stepSizes[i] * speed;
+                moveBy[i] += reading.AxisDiscrete[i] * StepSize * speed;
             }
             if (moveBy[i] != 0)
             {
