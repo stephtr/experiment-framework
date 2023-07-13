@@ -140,6 +140,7 @@ internal partial class StageSectionViewModel : ObservableObject
         var dt = Math.Min(0.1, (DateTime.UtcNow - lastTimeStamp).TotalSeconds);
         lastTimeStamp = DateTime.UtcNow;
 
+        var speedUp = reading.X ? 10 : 1;
         var moveBy = new double[] { 0, 0, 0 };
         for (var i = 0; i < Math.Min(Axes.Count, 3); i++)
         {
@@ -149,12 +150,11 @@ internal partial class StageSectionViewModel : ObservableObject
             }
             if (reading.Axis[i] != 0)
             {
-                moveBy[i] += reading.Axis[i] * dt * 200;
+                moveBy[i] += reading.Axis[i] * dt * 200 * speedUp;
             }
-            if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, /*reading.X, */ reading.Y }.All(x => x == false))
+            if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, reading.Y }.All(x => x == false))
             {
-                var speed = reading.X ? 10 : 1;
-                moveBy[i] += reading.AxisDiscrete[i] * StepSize * speed;
+                moveBy[i] += reading.AxisDiscrete[i] * StepSize * speedUp;
             }
             if (moveBy[i] != 0)
             {

@@ -39,7 +39,7 @@ internal partial class StageControlViewModel : ObservableObject
         {
             return new StageSectionViewModel(
                 s.Axes.Select(ax =>
-                    (ax.AxisIndex < stage.Axes.Length ? (stage.Axes[ax.AxisIndex], ax.PositiveDirection) : (null, true))
+                    ax.AxisIndex < stage.Axes.Length ? (stage.Axes[ax.AxisIndex], ax.PositiveDirection) : (null, true)
                 ).Where(ax => ax.Item1 != null) as IEnumerable<(AxisComponent, bool)>,
                 s.Title ?? "Stage", i.ToString(), s.EnableTiltCompensation, haveToSavePosition
             );
@@ -67,7 +67,7 @@ public sealed partial class StageControl : UserControl
         ExperimentContainer.Singleton.AddComponentChangeHandler<StageComponent>((_) => ViewModel.UpdateSectionViews(Sections));
         ViewModel.UpdateSectionViews(Sections);
 
-        var updateLoop = async () =>
+        async Task updateLoop()
         {
             while (LoopRunning)
             {
@@ -77,8 +77,8 @@ public sealed partial class StageControl : UserControl
                 }
                 await Task.Delay(100);
             }
-        };
-        var controllerLoop = async () =>
+        }
+        async Task controllerLoop()
         {
             var previousReading = new GameControllerReading();
             while (LoopRunning)
@@ -86,7 +86,7 @@ public sealed partial class StageControl : UserControl
                 var reading = GameController.GetReading();
                 var blankReading = new GameControllerReading();
 
-                if (reading.X && reading.AxisDiscrete[2] != 0 && previousReading.AxisDiscrete[2] == 0)
+                if (reading.A && reading.AxisDiscrete[2] != 0 && previousReading.AxisDiscrete[2] == 0 && ViewModel.SectionViews.Length > 1)
                 {
                     SectionsFlipView.SelectedIndex = (SectionsFlipView.SelectedIndex + reading.AxisDiscrete[2] + ViewModel.SectionViews.Length) % ViewModel.SectionViews.Length;
                 }
@@ -99,9 +99,9 @@ public sealed partial class StageControl : UserControl
                 previousReading = reading;
                 await Task.Delay(20);
             }
-        };
-        updateLoop();
-        controllerLoop();
+        }
+        _ = updateLoop();
+        _ = controllerLoop();
     }
 
     internal StageControlViewModel ViewModel => (StageControlViewModel)DataContext;
