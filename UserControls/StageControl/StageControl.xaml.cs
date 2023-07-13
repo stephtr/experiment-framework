@@ -10,7 +10,10 @@ internal partial class StageControlViewModel : ObservableObject
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasMultipleSections))]
+    [NotifyPropertyChangedFor(nameof(SectionViewsHeight))]
     private StageSectionViewModel[] sectionViews = new StageSectionViewModel[] { };
+
+    public float SectionViewsHeight => 90f + SectionViews.Aggregate(0f, (oldMax, section) => Math.Max(oldMax, 36f * section.Axes.Count));
 
     public bool HasMultipleSections => SectionViews.Length > 1;
 

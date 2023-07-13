@@ -9,20 +9,13 @@
     Unloaded="UserControl_Unloaded">
 
     <StackPanel Background="{ThemeResource CardBackgroundFillColorDefault}" Padding="10" CornerRadius="5" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefault}">
-        <RelativePanel>
-            <FlipView Name="SectionsFlipView" ItemsSource="{x:Bind ViewModel.SectionViews, Mode=OneWay}" Background="Transparent" >
-                <FlipView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel AreScrollSnapPointsRegular="False" Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </FlipView.ItemsPanel>
-                <FlipView.ItemTemplate>
-                    <DataTemplate x:DataType="local:StageSectionViewModel">
-                        <local:StageSectionControl ViewModel="{x:Bind (local:StageSectionViewModel)}" />
-                    </DataTemplate>
-                </FlipView.ItemTemplate>
-            </FlipView>
-            <PipsPager NumberOfPages="{x:Bind SectionsFlipView.Items.Count, Mode=OneWay}" SelectedPageIndex="{x:Bind SectionsFlipView.SelectedIndex, Mode=TwoWay}" RelativePanel.Below="SectionsFlipView" RelativePanel.AlignHorizontalCenterWithPanel="True" />
-        </RelativePanel>
+        <FlipView Name="SectionsFlipView" ItemsSource="{x:Bind ViewModel.SectionViews, Mode=OneWay}" Background="Transparent" Height="{x:Bind ViewModel.SectionViewsHeight, Mode=OneWay}">
+            <FlipView.ItemTemplate>
+                <DataTemplate x:DataType="local:StageSectionViewModel">
+                    <local:StageSectionControl ViewModel="{x:Bind (local:StageSectionViewModel)}" />
+                </DataTemplate>
+            </FlipView.ItemTemplate>
+        </FlipView>
+        <PipsPager NumberOfPages="{x:Bind SectionsFlipView.Items.Count, Mode=OneWay}" SelectedPageIndex="{x:Bind SectionsFlipView.SelectedIndex, Mode=TwoWay}" HorizontalAlignment="Center" />
     </StackPanel>
 </UserControl>
