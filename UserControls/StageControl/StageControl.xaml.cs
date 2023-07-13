@@ -91,9 +91,9 @@ public sealed partial class StageControl : UserControl
                     SectionsFlipView.SelectedIndex = (SectionsFlipView.SelectedIndex + reading.AxisDiscrete[2] + ViewModel.SectionViews.Length) % ViewModel.SectionViews.Length;
                 }
 
-                foreach (var section in ViewModel.SectionViews)
+                foreach (var (section, index) in ViewModel.SectionViews.Select((item, index) => (item, index)))
                 {
-                    section.GameControllerUpdate(section == SectionsFlipView.SelectedItem ? reading : blankReading);
+                    section.GameControllerUpdate(index == SectionsFlipView.SelectedIndex ? reading : blankReading);
                 }
 
                 previousReading = reading;

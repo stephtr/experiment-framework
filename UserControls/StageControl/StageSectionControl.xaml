@@ -24,7 +24,7 @@
                             <ColumnDefinition Width="14" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="14" />
-                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="90" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
                         <StackPanel Orientation="Horizontal" Grid.Column="1">
