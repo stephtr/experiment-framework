@@ -9,10 +9,19 @@ public partial class PressureViewModel : ObservableObject, IDisposable
     [NotifyPropertyChangedFor(nameof(PressureText))]
     private PressureSensorComponent? sensor;
 
+    private static string FormatPressure(float pressure)
+    {
+        return pressure.ToString(
+            pressure >= 1 ?
+                (pressure >= 10 ? "F1" : "F2") :
+                "0.00 e+0"
+        );
+    }
+
     public string PressureText => Sensor?.SensorStatus switch
     {
         null => "",
-        PressureSensorStatus.Ok => $"{(Sensor.CurrentPressure >= 1 ? Sensor.CurrentPressure.ToString("F1") : Sensor.CurrentPressure.ToString("0.0 e+0"))} mbar",
+        PressureSensorStatus.Ok => $"{FormatPressure(Sensor.CurrentPressure)} mbar",
         PressureSensorStatus.Unknown => "",
         PressureSensorStatus.Error => "error",
         PressureSensorStatus.Overrange => "overrange",
