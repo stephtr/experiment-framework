@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ExperimentFramework;
 
-public record StageSection(IEnumerable<(int AxisIndex, bool PositiveDirection)> Axes, string? Title = null, bool EnableTiltCompensation = true);
+public record StageSection(IEnumerable<(int AxisIndex, bool AxisInverted)> Axes, string? Title = null, bool EnableTiltCompensation = true);
 
 internal partial class StageControlViewModel : ObservableObject
 {
@@ -39,7 +39,7 @@ internal partial class StageControlViewModel : ObservableObject
         {
             return new StageSectionViewModel(
                 s.Axes.Select(ax =>
-                    ax.AxisIndex < stage.Axes.Length ? (stage.Axes[ax.AxisIndex], ax.PositiveDirection) : (null, true)
+                    ax.AxisIndex < stage.Axes.Length ? (stage.Axes[ax.AxisIndex], ax.AxisInverted) : (null, true)
                 ).Where(ax => ax.Item1 != null) as IEnumerable<(AxisComponent, bool)>,
                 s.Title ?? "Stage", i.ToString(), s.EnableTiltCompensation, haveToSavePosition
             );

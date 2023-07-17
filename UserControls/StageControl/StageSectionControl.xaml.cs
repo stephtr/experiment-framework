@@ -12,7 +12,7 @@ internal partial class AxisViewModel : ObservableObject
     public string Name { get; set; }
     public string Id { get; set; }
     private readonly bool SavePosition;
-    public bool PositiveDirection { get; set; }
+    public bool AxisInverted { get; set; }
     public double MinPosition { get => Axis.MinPosition; }
     public double MaxPosition { get => Axis.MaxPosition; }
     public string ActualPositionFormatted { get => Axis.ActualPosition.ToString("N3"); }
@@ -49,12 +49,12 @@ internal partial class AxisViewModel : ObservableObject
         OnPropertyChanged(nameof(ActualPositionFormatted));
     }
 
-    public AxisViewModel(AxisComponent axis, string name, string id, bool positiveDirection, bool savePosition)
+    public AxisViewModel(AxisComponent axis, string name, string id, bool axisInverted, bool savePosition)
     {
         Axis = axis;
         Id = id;
         Name = name + ":";
-        PositiveDirection = positiveDirection;
+        AxisInverted = axisInverted;
         SavePosition = savePosition;
         if (SavePosition)
         {
@@ -109,13 +109,13 @@ internal partial class StageSectionViewModel : ObservableObject
         }
     }
 
-    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool PositiveDirection)> axes, string title, string id, bool enableTiltCompensation, bool savePosition)
+    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool AxisInverted)> axes, string title, string id, bool enableTiltCompensation, bool savePosition)
     {
         Id = id;
         Title = title;
         foreach (var (ax, i) in axes.Select((ax, i) => (ax, i)))
         {
-            Axes.Add(new AxisViewModel(ax.Axis, AxisNames[i], $"{id}-{AxisNames[i]}", ax.PositiveDirection, savePosition));
+            Axes.Add(new AxisViewModel(ax.Axis, AxisNames[i], $"{id}-{AxisNames[i]}", ax.AxisInverted, savePosition));
         }
         if (enableTiltCompensation && Axes.Count >= 3)
         {
@@ -159,7 +159,7 @@ internal partial class StageSectionViewModel : ObservableObject
             if (moveBy[i] != 0)
             {
                 var currentPosition = Axes[i].TargetPosition;
-                var newPosition = Math.Clamp(currentPosition + moveBy[i], Axes[i].MinPosition, Axes[i].MaxPosition); // In case the movement gets clamped...
+                var newPosition = Math.Clamp(currentPosition + moveBy[i] * (Axes[i].AxisInverted ? -1 : 1), Axes[i].MinPosition, Axes[i].MaxPosition); // In case the movement gets clamped...
                 moveBy[i] = newPosition - currentPosition; // ...let's update `moveBy`
                 Axes[i].TargetPosition = newPosition;
             }
