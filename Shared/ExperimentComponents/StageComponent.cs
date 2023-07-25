@@ -6,6 +6,7 @@ public abstract class AxisComponent
     public abstract double ActualPosition { get; }
     public abstract double MinPosition { get; }
     public abstract double MaxPosition { get; }
+    public abstract double MaxMoveSpeed { get; }
 }
 
 [DisplayName("Stage")]
@@ -30,8 +31,9 @@ public class FakeAxis : AxisComponent
             return position + noise * 0.1;
         }
     }
-    public override double MinPosition { get => 0; }
-    public override double MaxPosition { get => 1000; }
+    public override double MinPosition => 0;
+    public override double MaxPosition => 1000;
+    public override double MaxMoveSpeed => 1000;
 }
 
 [DisplayName("Debug")]

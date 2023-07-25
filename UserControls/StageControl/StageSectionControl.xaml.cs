@@ -82,7 +82,8 @@ internal partial class StageSectionViewModel : ObservableObject
     public bool IsLocked
     {
         get => isLocked;
-        set {
+        set
+        {
             isLocked = value;
             OnPropertyChanged(nameof(IsUnlocked));
             foreach (var axis in Axes)
@@ -98,7 +99,8 @@ internal partial class StageSectionViewModel : ObservableObject
     public float StepSize
     {
         get => stepSize;
-        set {
+        set
+        {
             stepSize = value;
             OnPropertyChanged(nameof(StepSize));
             foreach (var axis in Axes)
@@ -144,10 +146,6 @@ internal partial class StageSectionViewModel : ObservableObject
         var moveBy = new double[] { 0, 0, 0 };
         for (var i = 0; i < Math.Min(Axes.Count, 3); i++)
         {
-            if (i == 2 && TiltCompensation?.CompensationGradients != null)
-            {
-                moveBy[i] += TiltCompensation.CompensationGradients[0] * moveBy[0] + TiltCompensation.CompensationGradients[1] * moveBy[1];
-            }
             if (reading.Axis[i] != 0)
             {
                 moveBy[i] += reading.Axis[i] * dt * 200 * speedUp;
@@ -155,6 +153,19 @@ internal partial class StageSectionViewModel : ObservableObject
             if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, reading.Y }.All(x => x == false))
             {
                 moveBy[i] += reading.AxisDiscrete[i] * StepSize * speedUp;
+            }
+            if (moveBy[i] != 0)
+            {
+                var remainingMove = Math.Abs(Axes[i].Axis.ActualPosition - Axes[i].Axis.TargetPosition);
+                if (remainingMove > Axes[i].Axis.MaxMoveSpeed * 0.1)
+                {
+                    // if the target is beyond reach within the next 0.1 s, don't move it further
+                    moveBy[i] = 0;
+                }
+            }
+            if (i == 2 && TiltCompensation?.CompensationGradients != null)
+            {
+                moveBy[i] += TiltCompensation.CompensationGradients[0] * moveBy[0] + TiltCompensation.CompensationGradients[1] * moveBy[1];
             }
             if (moveBy[i] != 0)
             {
