@@ -157,8 +157,8 @@ internal partial class StageSectionViewModel : ObservableObject
             }
             if (moveBy[i] != 0)
             {
-                var remainingMove = Math.Abs(Axes[i].Axis.TargetPosition - Axes[i].Axis.ActualPosition);
-                if (remainingMove > Axes[i].Axis.MaxMoveSpeed * 0.25 && Math.Sign(remainingMove) == Math.Sign(moveBy[i]))
+                var remainingMove = Axes[i].Axis.TargetPosition - Axes[i].Axis.ActualPosition;
+                if (Math.Abs(remainingMove) > Axes[i].Axis.MaxMoveSpeed * 0.25 && Math.Sign(remainingMove) == Math.Sign(moveBy[i]))
                 {
                     // if the target is beyond reach within the next 0.25 s, don't move it further
                     moveBy[i] = 0;
