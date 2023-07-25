@@ -142,24 +142,25 @@ internal partial class StageSectionViewModel : ObservableObject
         var dt = Math.Min(0.1, (DateTime.UtcNow - lastTimeStamp).TotalSeconds);
         lastTimeStamp = DateTime.UtcNow;
 
-        var speedUp = reading.X ? 10 : 1;
         var moveBy = new double[] { 0, 0, 0 };
         for (var i = 0; i < Math.Min(Axes.Count, 3); i++)
         {
+            var axisSign = Axes[i].AxisInverted ? -1 : 1;
             if (reading.Axis[i] != 0)
             {
-                moveBy[i] += reading.Axis[i] * dt * 200 * speedUp;
+                moveBy[i] += reading.Axis[i] * dt * 2000 * axisSign;
             }
             if (reading.AxisDiscrete[i] != 0 && previousReading.AxisDiscrete[i] == 0 && new[] { reading.A, reading.B, reading.Y }.All(x => x == false))
             {
-                moveBy[i] += reading.AxisDiscrete[i] * StepSize * speedUp;
+                var speedUp = reading.X ? 10 : 1;
+                moveBy[i] += reading.AxisDiscrete[i] * StepSize * speedUp * axisSign;
             }
             if (moveBy[i] != 0)
             {
-                var remainingMove = Math.Abs(Axes[i].Axis.ActualPosition - Axes[i].Axis.TargetPosition);
-                if (remainingMove > Axes[i].Axis.MaxMoveSpeed * 0.1)
+                var remainingMove = Math.Abs(Axes[i].Axis.TargetPosition - Axes[i].Axis.ActualPosition);
+                if (remainingMove > Axes[i].Axis.MaxMoveSpeed * 0.25 && Math.Sign(remainingMove) == Math.Sign(moveBy[i]))
                 {
-                    // if the target is beyond reach within the next 0.1 s, don't move it further
+                    // if the target is beyond reach within the next 0.25 s, don't move it further
                     moveBy[i] = 0;
                 }
             }
@@ -170,7 +171,7 @@ internal partial class StageSectionViewModel : ObservableObject
             if (moveBy[i] != 0)
             {
                 var currentPosition = Axes[i].TargetPosition;
-                var newPosition = Math.Clamp(currentPosition + moveBy[i] * (Axes[i].AxisInverted ? -1 : 1), Axes[i].MinPosition, Axes[i].MaxPosition); // In case the movement gets clamped...
+                var newPosition = Math.Clamp(currentPosition + moveBy[i], Axes[i].MinPosition, Axes[i].MaxPosition); // In case the movement gets clamped...
                 moveBy[i] = newPosition - currentPosition; // ...let's update `moveBy`
                 Axes[i].TargetPosition = newPosition;
             }
