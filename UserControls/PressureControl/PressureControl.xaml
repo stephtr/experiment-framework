@@ -13,6 +13,6 @@
             <TextBlock FontFamily="{StaticResource SymbolThemeFontFamily}" Text="&#xE957;" VerticalAlignment="Center" FontWeight="SemiLight" FontSize="22" Margin="0,3,8,0" />
             <TextBlock Text="Pressure" FontSize="22" />
         </StackPanel>
-        <TextBlock Margin="0,5,0,3" Text="{x:Bind ViewModel.PressureText}" TextAlignment="Center" FontSize="26" />
+        <TextBlock Margin="0,5,0,3" Text="{x:Bind ViewModel.PressureText}" TextAlignment="Center" FontSize="34" />
     </StackPanel>
 </UserControl>
