@@ -111,7 +111,7 @@ internal partial class StageSectionViewModel : ObservableObject
         }
     }
 
-    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool AxisInverted)> axes, string title, string id, bool enableTiltCompensation, bool savePosition)
+    public StageSectionViewModel(IEnumerable<(AxisComponent Axis, bool AxisInverted)> axes, string title, string id, bool enableTiltCompensation, bool enableScanMode, bool savePosition)
     {
         Id = id;
         Title = title;
