@@ -16,7 +16,7 @@ public abstract class ChannelComponent
 
 [DisplayName("ADC")]
 [IconString("\xEC4A")]
-public abstract class ADCComponent: ExperimentComponentClass
+public abstract class ADCComponent : ExperimentComponentClass
 {
     public abstract ChannelComponent[] Channels { get; }
 }
@@ -31,5 +31,15 @@ public class FakeChannel : ChannelComponent
 [DisplayName("Debug")]
 public class FakeADC : ADCComponent
 {
-    public override ChannelComponent[] Channels => throw new NotImplementedException();
+    private const int numChannels = 14;
+    public ChannelComponent[] channels = new ChannelComponent[numChannels];
+    public override ChannelComponent[] Channels => channels.ToArray();
+
+    public FakeADC()
+    {
+        for (var i = 0; i < numChannels; i++)
+        {
+            channels[i] = new FakeChannel();
+        }
+    }
 }
