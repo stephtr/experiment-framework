@@ -11,23 +11,13 @@ public partial class PressureViewModel : ObservableObject, IDisposable
 
     private static string FormatPressure(float pressure)
     {
-        var formatString = "";
-        if (pressure >= 100)
+        var formatString = pressure switch
         {
-            formatString = "F0";
-        }
-        else if (pressure >= 10)
-        {
-            formatString = "F1";
-        }
-        else if (pressure >= 1)
-        {
-            formatString = "F2";
-        }
-        else
-        {
-            formatString = "0.00 e+0";
-        }
+            (>=100) => "F0",
+            (>=10) => "F1",
+            (>=1) => "F2",
+            _ => "0.00 e+0",
+        };
         return pressure.ToString(formatString);
     }
 
