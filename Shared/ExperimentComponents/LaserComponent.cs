@@ -24,10 +24,10 @@ public abstract class LaserComponent : ExperimentComponentClass
     public abstract bool HasSettled { get; }
 
     public abstract bool HasWavelengthOffsetControl { get; }
-    public abstract int WavelengthOffset { get; set; }
+    public abstract double WavelengthOffset { get; set; }
 
     public abstract bool HasModulationControl { get; }
-    public abstract int ModulationGain { get; set; }
+    public abstract double ModulationGain { get; set; }
 
 }
 
@@ -66,10 +66,10 @@ public class FakeLaser : CWLaserComponent
     public override bool HasSettled => true;
 
     public override bool HasWavelengthOffsetControl => true;
-    public override int WavelengthOffset { get; set; } = 0;
+    public override double WavelengthOffset { get; set; } = 0;
 
     public override bool HasModulationControl => true;
-    public override int ModulationGain { get; set; } = 100;
+    public override double ModulationGain { get; set; } = 100;
 }
 
 [DisplayName("Debug (pulsed)")]
@@ -94,8 +94,8 @@ public class FakePulsedLaser : LaserComponent
     public override bool HasSettled => true;
 
     public override bool HasWavelengthOffsetControl => false;
-    public override int WavelengthOffset { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override double WavelengthOffset { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
     public override bool HasModulationControl => false;
-    public override int ModulationGain { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public override double ModulationGain { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }
