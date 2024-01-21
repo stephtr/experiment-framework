@@ -21,13 +21,29 @@ public abstract class LaserComponent : ExperimentComponentClass
     public abstract int BurstSize { get; set; }
     public abstract int BurstFrequencyDivider { get; set; }
     public abstract void Burst();
+    public abstract bool HasSettled { get; }
+
+    public abstract bool HasWavelengthOffsetControl { get; }
+    public abstract int WavelengthOffset { get; set; }
+
+    public abstract bool HasModulationControl { get; }
+    public abstract int ModulationGain { get; set; }
+
+}
+
+public abstract class CWLaserComponent: LaserComponent
+{
+    public override bool HasBurstControl => false;
+    public override int BurstSize { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override int BurstFrequencyDivider { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override void Burst() { throw new NotSupportedException(); }
+    public override LaserMode Mode { get => LaserMode.Continuous; set { if (value != LaserMode.Continuous) throw new NotSupportedException(); } }
 }
 
 [DisplayName("Debug (cw)")]
-public class FakeLaser : LaserComponent
+public class FakeLaser : CWLaserComponent
 {
     public override bool HasPowerControl => true;
-    public override bool HasBurstControl => false;
 
     public FakeLaser()
     {
@@ -47,10 +63,13 @@ public class FakeLaser : LaserComponent
             return power + noise * 10;
         }
     }
-    public override LaserMode Mode { get => LaserMode.Continuous; set { if (value != LaserMode.Continuous) throw new NotSupportedException(); } }
-    public override int BurstSize { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-    public override int BurstFrequencyDivider { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-    public override void Burst() { throw new NotSupportedException(); }
+    public override bool HasSettled => true;
+
+    public override bool HasWavelengthOffsetControl => true;
+    public override int WavelengthOffset { get; set; } = 0;
+
+    public override bool HasModulationControl => true;
+    public override int ModulationGain { get; set; } = 100;
 }
 
 [DisplayName("Debug (pulsed)")]
@@ -68,8 +87,15 @@ public class FakePulsedLaser : LaserComponent
     public override double TargetPower { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
     public override double MaxTargetPower { get => throw new NotSupportedException(); }
     public override double ActualPower { get => throw new NotSupportedException(); }
-    public override LaserMode Mode { get; set; } = LaserMode.Burst;
+    public override LaserMode Mode { get => LaserMode.Burst; set { if (value == LaserMode.Continuous) throw new NotSupportedException(); } }
     public override int BurstSize { get; set; } = 1;
     public override int BurstFrequencyDivider { get; set; } = 1;
     public override void Burst() { }
+    public override bool HasSettled => true;
+
+    public override bool HasWavelengthOffsetControl => false;
+    public override int WavelengthOffset { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+    public override bool HasModulationControl => false;
+    public override int ModulationGain { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }
