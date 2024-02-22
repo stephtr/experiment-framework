@@ -14,6 +14,7 @@ public struct OscilloscopeWaveform
     public DateTime CreationTime;
     public (double, double)? DisplayBound;
     public (double, double) Timespan;
+    public double dt;
 }
 
 [DisplayName("Oscilloscope")]
@@ -40,9 +41,10 @@ public class FakeOscilloscope : OscilloscopeComponent
     {
         var n = 1000;
         var data = new (float, float)[n];
+        var dt = 1 / (double)n;
         for (int i = 0; i < n; i++)
         {
-            data[i] = (i / (float)n, (float)Math.Sin(i * 2 * Math.PI / n));
+            data[i] = ((float)(i * dt), (float)Math.Sin(i * 2 * Math.PI / n));
         }
         return Task.FromResult(new OscilloscopeWaveform
         {
@@ -50,6 +52,7 @@ public class FakeOscilloscope : OscilloscopeComponent
             CreationTime = DateTime.Now,
             DisplayBound = (-1.5, 1.5),
             Timespan = (0, 1),
+            dt = dt,
         });
     }
 
