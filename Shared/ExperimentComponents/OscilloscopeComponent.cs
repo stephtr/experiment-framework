@@ -10,7 +10,7 @@ public enum OscilloscopeTriggerMode
 
 public struct OscilloscopeWaveform
 {
-    public (float Time, float Value)[] Data;
+    public float[] Data;
     public DateTime CreationTime;
     public (double, double)? DisplayBound;
     public (double, double) Timespan;
@@ -40,11 +40,11 @@ public class FakeOscilloscope : OscilloscopeComponent
     public override Task<OscilloscopeWaveform> GetWaveform(string channel)
     {
         var n = 1000;
-        var data = new (float, float)[n];
+        var data = new float[n];
         var dt = 1 / (double)n;
         for (int i = 0; i < n; i++)
         {
-            data[i] = ((float)(i * dt), (float)Math.Sin(i * 2 * Math.PI / n));
+            data[i] = (float)Math.Sin(i * 2 * Math.PI / n);
         }
         return Task.FromResult(new OscilloscopeWaveform
         {
