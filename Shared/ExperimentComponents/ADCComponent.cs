@@ -31,7 +31,7 @@ public class FakeChannel : ChannelComponent
 [DisplayName("Debug")]
 public class FakeADC : ADCComponent
 {
-    private const int numChannels = 14;
+    private const int numChannels = 119;
     public ChannelComponent[] channels = new ChannelComponent[numChannels];
     public override ChannelComponent[] Channels => channels.ToArray();
 
